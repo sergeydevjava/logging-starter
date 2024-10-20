@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.sergeydevjava'
+version = '1.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+publishing {
+    publications {
+        maven (MavenPublication) {
+            groupId = rootProject.getGroup()
+            artifactId = rootProject.getName()
+            version = rootProject.getVersion()
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = "file://${project.projectDir.toString()}/maven-repo/"
+        }
+    }
+}
+
+
+
