@@ -19,7 +19,7 @@ public class LoggingStarterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "logging.web-logging", value = "enabled", havingValue = "true")
+    @ConditionalOnProperty(prefix = "logging.web-logging", value = "enabled", havingValue = "true", matchIfMissing = true)
     public WebLoggingFilter webLoggingFilter() {
         return new WebLoggingFilter();
     }
