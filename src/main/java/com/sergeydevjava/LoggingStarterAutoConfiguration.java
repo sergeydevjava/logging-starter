@@ -4,6 +4,7 @@ import com.sergeydevjava.aspect.LogExecutionAspect;
 import com.sergeydevjava.webfilter.WebLoggingFilter;
 import com.sergeydevjava.webfilter.WebLoggingRequestBodyAdvice;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
@@ -24,7 +25,8 @@ public class LoggingStarterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "logging.web-logging", value = {"enabled", "log-body"}, havingValue = "true")
+    @ConditionalOnBean(WebLoggingFilter.class)
+    @ConditionalOnProperty(prefix = "logging.web-logging", value = "log-body", havingValue = "true")
     public WebLoggingRequestBodyAdvice webLoggingRequestBodyAdvice() {
         return new WebLoggingRequestBodyAdvice();
     }
