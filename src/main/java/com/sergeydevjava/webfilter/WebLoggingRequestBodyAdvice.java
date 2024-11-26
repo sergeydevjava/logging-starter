@@ -1,5 +1,6 @@
 package com.sergeydevjava.webfilter;
 
+import com.sergeydevjava.service.WebContentManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -17,7 +18,13 @@ import java.util.Optional;
 @ControllerAdvice
 public class WebLoggingRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
+    private final WebContentManager webContentManager;
+
     Logger log = LoggerFactory.getLogger(WebLoggingRequestBodyAdvice.class);
+
+    public WebLoggingRequestBodyAdvice(WebContentManager webContentManager) {
+        this.webContentManager = webContentManager;
+    }
 
     @Autowired
     private HttpServletRequest request;
@@ -26,8 +33,12 @@ public class WebLoggingRequestBodyAdvice extends RequestBodyAdviceAdapter {
     public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
         String method = request.getMethod();
         String requestURI = request.getRequestURI() + formatQueryString(request);
-        log.info("Тело запроса {} {} {} стартер", method, requestURI, body);
-        return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
+        if (webContentManager.shouldBeExcluded(requestURI)) {
+            return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
+        } else {
+            log.info("Тело запроса {} {} {} стартер", method, requestURI, body);
+            return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
+        }
     }
 
     @Override

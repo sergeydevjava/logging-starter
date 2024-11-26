@@ -1,5 +1,6 @@
 package com.sergeydevjava.webfilter;
 
+import com.sergeydevjava.service.WebContentManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
@@ -22,16 +23,32 @@ import java.util.stream.Collectors;
 @Component
 public class WebLoggingFilter extends HttpFilter {
 
+    private final WebContentManager webContentManager;
+
     Logger log = LoggerFactory.getLogger(WebLoggingFilter.class);
+
+    public WebLoggingFilter(WebContentManager webContentManager) {
+        this.webContentManager = webContentManager;
+    }
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String method = request.getMethod();
         String requestURI = request.getRequestURI() + formatQueryString(request);
+
+        if (webContentManager.shouldBeExcluded(requestURI)) {
+            super.doFilter(request, response, chain);
+        } else {
+            doFilterWithLogging(request, response, chain, method, requestURI);
+        }
+    }
+
+    private void doFilterWithLogging(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String method, String requestURI) throws IOException, ServletException {
         String headers = inlineHeaders(request);
         log.info("Запрос {} {} {} стартер", method, requestURI, headers);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         try {
+
             super.doFilter(request, responseWrapper, chain);
 
             String responseBody = "body=" + new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
@@ -39,7 +56,6 @@ public class WebLoggingFilter extends HttpFilter {
         } finally {
             responseWrapper.copyBodyToResponse();
         }
-
     }
 
     private String inlineHeaders(HttpServletRequest request) {
@@ -48,7 +64,9 @@ public class WebLoggingFilter extends HttpFilter {
         String inlineHeaders = headersMap.entrySet().stream()
                 .map(entry -> {
                     String headerName = entry.getKey();
-                    String headerValue = entry.getValue();
+                    String headerValue = webContentManager.shouldBeObfuscated(headerName)
+                            ? "*********"
+                            : entry.getValue();
                     return headerName + "=" + headerValue;
                 })
                 .collect(Collectors.joining(","));
