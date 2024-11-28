@@ -1,6 +1,7 @@
 package com.sergeydevjava.service;
 
 import com.sergeydevjava.property.LoggingProperties;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 public class WebContentManager {
@@ -11,13 +12,13 @@ public class WebContentManager {
         this.loggingProperties = loggingProperties;
     }
 
-    public boolean shouldBeExcluded(String request) {
+    public boolean shouldBeExcluded(HttpServletRequest request) {
         return loggingProperties.getExclude().stream()
-                .anyMatch(request::matches);
+                .anyMatch(antPathRequestMatcher -> antPathRequestMatcher.matches(request));
     }
 
     public boolean shouldBeObfuscated(String headerName) {
         return loggingProperties.getObfuscate().getHeaders().stream()
-                .anyMatch(headerName::matches);
+                .anyMatch(headerName::equalsIgnoreCase);
     }
 }

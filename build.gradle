@@ -15,6 +15,7 @@ def springVersion = '3.2.5'
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web:${springVersion}"
     implementation "org.springframework.boot:spring-boot-starter-aop:${springVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-security:${springVersion}"
 }
 
 publishing {

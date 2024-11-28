@@ -18,32 +18,28 @@ import java.util.Optional;
 @ControllerAdvice
 public class WebLoggingRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
+    private static final Logger log = LoggerFactory.getLogger(WebLoggingRequestBodyAdvice.class);
+
     private final WebContentManager webContentManager;
 
-    Logger log = LoggerFactory.getLogger(WebLoggingRequestBodyAdvice.class);
+    @Autowired
+    private HttpServletRequest request;
 
     public WebLoggingRequestBodyAdvice(WebContentManager webContentManager) {
         this.webContentManager = webContentManager;
     }
 
-    @Autowired
-    private HttpServletRequest request;
-
     @Override
     public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
         String method = request.getMethod();
         String requestURI = request.getRequestURI() + formatQueryString(request);
-        if (webContentManager.shouldBeExcluded(requestURI)) {
-            return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
-        } else {
-            log.info("Тело запроса {} {} {} стартер", method, requestURI, body);
-            return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
-        }
+        log.info("Тело запроса {} {} {} стартер", method, requestURI, body);
+        return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
     }
 
     @Override
     public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        return !webContentManager.shouldBeExcluded(request);
     }
 
     private String formatQueryString(HttpServletRequest request) {
