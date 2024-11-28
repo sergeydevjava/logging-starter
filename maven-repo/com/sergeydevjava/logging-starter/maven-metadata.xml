@@ -3,11 +3,10 @@
   <groupId>com.sergeydevjava</groupId>
   <artifactId>logging-starter</artifactId>
   <versioning>
-    <latest>1.1-SNAPSHOT</latest>
+    <latest>1.5-SNAPSHOT</latest>
     <versions>
-      <version>1.0-SNAPSHOT</version>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.5-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20241020211223</lastUpdated>
+    <lastUpdated>20241124153246</lastUpdated>
   </versioning>
 </metadata>
